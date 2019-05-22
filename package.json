@@ -1,0 +1,23 @@
+{
+  "name": "pizza-topping",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jiangren-mel-fullstack-1903/pizza-topping.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jiangren-mel-fullstack-1903/pizza-topping/issues"
+  },
+  "homepage": "https://github.com/jiangren-mel-fullstack-1903/pizza-topping#readme",
+  "dependencies": {
+    "express": "^4.17.0"
+  }
+}
