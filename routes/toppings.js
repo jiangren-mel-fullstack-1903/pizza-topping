@@ -5,40 +5,38 @@ var toppingsRepository = require('../repositories/toppings');
 
 /* GET toppings listing. */
 router.get('/', function(req, res, next) {
-  res.json(toppingsRepository.getAll());
+  toppingsRepository.getAll((err, rows) => {
+    if (err) res.status(500).send(err);
+    else res.json(rows);
+  })
 });
 
 router.post('/', function(req, res, next) {
-  try {
-    let newItem = toppingsRepository.create(req.body);
-    res.json(newItem);
-  } catch(e) {
-    res.status(401).send(e);
-  }
+  toppingsRepository.create(req.body, (err, row) => {
+    if (err) res.status(500).send(err);
+    else res.json(row);
+  });
 });
 
 router.get('/:id', function(req, res, next) {
-  try {
-    let found = toppingsRepository.getById(req.params.id);
-    res.json(found);
-  } catch (e) {
-    res.status(402).send(e);
-  }
+  toppingsRepository.getById(req.params.id, (err, row) => {
+    if (err) res.status(500).send(err);
+    else res.json(row);
+  });
 });
 
 router.patch('/:id', function(req, res, next) {
-  let found = toppingsRepository.patch(req.params.id, req.body);
-  res.json(found);
-});
-
-router.put('/:id', function(req, res, next) {
-  let newElement = toppingsRepository.put(req.params.id, req.body);
-  res.json(newElement);
+  toppingsRepository.patch(req.params.id, req.body, (err, row) => {
+    if (err) res.status(500).json(err);
+    else res.json(row);
+  });
 });
 
 router.delete('/:id', function(req, res, next) {
-  let removed = toppingsRepository.delete(req.params.id);
-  res.json(removed);
+  toppingsRepository.delete(req.params.id, (err, row) => {
+    if (err) res.status(500).send(err);
+    else res.json(row);
+  });
 });
 
 module.exports = router;

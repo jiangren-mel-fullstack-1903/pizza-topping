@@ -1,56 +1,107 @@
-class Topping {
-    constructor(id, name, image) {
-        this.id = id;
-        this.name = name;
-        this.image = image;
-    }
-}
+var sqlite3 = require('sqlite3').verbose()
+
 
 class ToppingsRepository {
     constructor() {
-        this.toppings = [
-            new Topping(1, 'bread', ''),
-            new Topping(2, 'bacon', ''),
-            new Topping(3, 'cheese', '')
-        ];
+        this.db = new sqlite3.Database('sqlite/sqlite.db');
     }
 
-    getAll() {
-        return this.toppings;
+    // callback?: (this: Statement, err: Error | null, rows: any[]) => void
+    getAll(callback) {
+        this.db.all('select * from topping', (err, rows) => {
+            callback(err, rows);
+        });
     }
 
-    getById(id) {
-        return this.toppings.find(x => x.id == req.params.id);
+    getById(id, callback) {
+        this.db.get(`select * from topping where id=${id}`, (err, row) => {
+            callback(err, row);
+        });
     }
 
-    create(body) {
-        var newId = this.toppings[this.toppings.length - 1].id + 1;
-        var newItem = Object.assign({}, { id: newId }, body);
-        this.toppings.push(newItem);
-        return newItem;
+    create(body, callback) {
+        let fields = [];
+        let values = [];
+        if (body.name) {
+            fields.push('name');
+            values.push(`'${body.name}'`);
+        }
+        if (body.price) {
+            fields.push('price');
+            values.push(`'${body.price}'`);
+        }
+        if (body.image) {
+            fields.push('image');
+            values.push(`'${body.image}'`);
+        }
+
+        let sql = `INSERT INTO 'topping' (${fields.join(',')}) VALUES (${values.join(',')})`;
+        this.db.run(sql, err => {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            this.db.get('select last_insert_rowid()', (err, row) => {
+                if (err) {
+                    callback(err, null);
+                    return;
+                }
+                let newId = row['last_insert_rowid()'];
+                this.getById(newId, (err, newRow) => {
+                    callback(err, newRow);
+                })
+            })
+        });
     }
 
-    put(id, body) {
-        let index = this.toppings.findIndex(x => x.id == id);
-        let newElement = { ...{ id: id }, ...body };
-        this.toppings[index] = newElement;
-        return newElement;
+    patch(id, body, callback) {
+        let fields = [];
+        if (body.name) {
+            fields.push(`name='${body.name}'`);
+        }
+        if (body.price) {
+            fields.push(`name='${body.price}'`);
+        }
+        if (body.image) {
+            fields.push(`name='${body.image}'`);
+        }
+        let fieldsStr = '';
+
+        if (fields.length > 0) {
+            fieldsStr = fields.join(', ');
+            fieldsStr = ' SET ' + fieldsStr;
+        }
+
+        let sql = `UPDATE topping ${fieldsStr} WHERE id = ${id}`;
+        this.db.run(sql, err => {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            this.getById(id, (err, row) => {
+                callback(err, row);
+            })
+        });
     }
 
-    patch(id, body) {
-        let found = this.toppings.find(x => x.id == id);
-        Object.assign(found, body);
-        return found;
-    }
+    delete(id, callback) {
+        this.getById(id, (err, row) => {
+            if (err) {
+                callback(err);
+                return;
+            }
 
-    delete(id) {
-        let index = this.toppings.findIndex(x => x.id == id);
-        let removed = this.toppings.splice(index, 1);
-        return removed;
+            this.db.run(`delete from 'topping' where id=${id}`, err => {
+                if (err) {
+                    callback(err, null);
+                    return;
+                }
+                callback(null, row);
+            });
+        })
     }
 
 }
 
 let toppingsRepository = new ToppingsRepository();
 module.exports = toppingsRepository;
-
