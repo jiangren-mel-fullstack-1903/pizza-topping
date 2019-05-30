@@ -7,19 +7,25 @@ class ToppingsRepository {
     }
 
     // callback?: (this: Statement, err: Error | null, rows: any[]) => void
-    getAll(callback) {
-        this.db.all('select * from topping', (err, rows) => {
-            callback(err, rows);
-        });
+    getAll() {
+        return new Promise((resolve, reject) => {
+            this.db.all('select * from topping', (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        })
     }
 
-    getById(id, callback) {
-        this.db.get(`select * from topping where id=${id}`, (err, row) => {
-            callback(err, row);
-        });
+    getById(id) {
+        return new Promise((resolve, reject) => {
+            this.db.get(`select * from topping where id=${id}`, (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        })
     }
 
-    create(body, callback) {
+    create(body) {
         let fields = [];
         let values = [];
         if (body.name) {
@@ -36,25 +42,30 @@ class ToppingsRepository {
         }
 
         let sql = `INSERT INTO 'topping' (${fields.join(',')}) VALUES (${values.join(',')})`;
-        this.db.run(sql, err => {
-            if (err) {
-                callback(err, null);
-                return;
-            }
-            this.db.get('select last_insert_rowid()', (err, row) => {
+
+        return new Promise((resolve, reject) => {
+            this.db.run(sql, err => {
                 if (err) {
-                    callback(err, null);
+                    reject(err);
                     return;
                 }
-                let newId = row['last_insert_rowid()'];
-                this.getById(newId, (err, newRow) => {
-                    callback(err, newRow);
+                this.db.get('select last_insert_rowid()', (err, row) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    let newId = row['last_insert_rowid()'];
+                    this.getById(newId).then(row => {
+                        resolve(row);
+                    }).catch(err => {
+                        reject(err);
+                    })
                 })
-            })
-        });
+            });
+        })
     }
 
-    patch(id, body, callback) {
+    patch(id, body) {
         let fields = [];
         if (body.name) {
             fields.push(`name='${body.name}'`);
@@ -73,31 +84,32 @@ class ToppingsRepository {
         }
 
         let sql = `UPDATE topping ${fieldsStr} WHERE id = ${id}`;
-        this.db.run(sql, err => {
-            if (err) {
-                callback(err, null);
-                return;
-            }
-            this.getById(id, (err, row) => {
-                callback(err, row);
-            })
-        });
-    }
 
-    delete(id, callback) {
-        this.getById(id, (err, row) => {
-            if (err) {
-                callback(err);
-                return;
-            }
-
-            this.db.run(`delete from 'topping' where id=${id}`, err => {
+        return new Promise((resolve, reject) => {
+            this.db.run(sql, err => {
                 if (err) {
-                    callback(err, null);
+                    reject(err);
                     return;
                 }
-                callback(null, row);
+                this.getById(id).then(row => {
+                    resolve(row);
+                }).catch(err => {
+                    reject(err);
+                })
             });
+        })
+    }
+
+    delete(id) {
+        return new Promise((resolve, reject) => {
+            this.getById(id).then(row => {
+                this.db.run(`delete from 'topping' where id=${id}`, err => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
+            }).catch(err => {
+                reject(err);
+            })
         })
     }
 
