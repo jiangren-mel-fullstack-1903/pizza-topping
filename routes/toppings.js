@@ -4,44 +4,49 @@ var router = express.Router();
 var toppingsRepository = require('../repositories/toppings');
 
 /* GET toppings listing. */
-router.get('/', function(req, res, next) {
-  toppingsRepository.getAll().then(rows => {
+router.get('/', async function(req, res, next) {
+  try {
+    let rows = await toppingsRepository.getAll();
     res.json(rows);
-  }).catch(err => {
+  } catch(err) {
     res.status(500).send(err);
-  })
+  }
 });
 
-router.post('/', function(req, res, next) {
-  toppingsRepository.create(req.body).then(row => {
+router.post('/', async function(req, res, next) {
+  try {
+    let row = await toppingsRepository.create(req.body);
     res.json(row);
-  }).catch(err => {
+  } catch(err) {
     res.status(500).send(err);
-  })
+  }
 });
 
-router.get('/:id', function(req, res, next) {
-  toppingsRepository.getById(req.params.id).then(row => {
+router.get('/:id', async function(req, res, next) {
+  try {
+    let row = await toppingsRepository.getById(req.params.id);
     res.json(row);
-  }).catch(err => {
+  } catch(err) {
     res.status(500).send(err);
-  })
+  }
 });
 
-router.patch('/:id', function(req, res, next) {
-  toppingsRepository.patch(req.params.id, req.body).then(row => {
+router.patch('/:id', async function(req, res, next) {
+  try {
+    let row = await toppingsRepository.patch(req.params.id, req.body);
     res.json(row);
-  }).catch(err => {
+  } catch(err) {
     res.status(500).send(err);
-  })
+  }
 });
 
-router.delete('/:id', function(req, res, next) {
-  toppingsRepository.delete(req.params.id).then(row => {
+router.delete('/:id', async function(req, res, next) {
+  try {
+    let row = await toppingsRepository.delete(req.params.id);
     res.json(row);
-  }).catch(err => {
+  } catch(err) {
     res.status(500).send(err);
-  })
+  }
 });
 
 module.exports = router;

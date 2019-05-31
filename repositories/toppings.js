@@ -7,8 +7,8 @@ class ToppingsRepository {
     }
 
     // callback?: (this: Statement, err: Error | null, rows: any[]) => void
-    getAll() {
-        return new Promise((resolve, reject) => {
+    async getAll() {
+        return await new Promise((resolve, reject) => {
             this.db.all('select * from topping', (err, rows) => {
                 if (err) reject(err);
                 else resolve(rows);
@@ -16,8 +16,8 @@ class ToppingsRepository {
         })
     }
 
-    getById(id) {
-        return new Promise((resolve, reject) => {
+    async getById(id) {
+        return await new Promise((resolve, reject) => {
             this.db.get(`select * from topping where id=${id}`, (err, row) => {
                 if (err) reject(err);
                 else resolve(row);
@@ -25,7 +25,7 @@ class ToppingsRepository {
         })
     }
 
-    create(body) {
+    async create(body) {
         let fields = [];
         let values = [];
         if (body.name) {
@@ -43,7 +43,7 @@ class ToppingsRepository {
 
         let sql = `INSERT INTO 'topping' (${fields.join(',')}) VALUES (${values.join(',')})`;
 
-        return new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
             this.db.run(sql, err => {
                 if (err) {
                     reject(err);
@@ -65,7 +65,7 @@ class ToppingsRepository {
         })
     }
 
-    patch(id, body) {
+    async patch(id, body) {
         let fields = [];
         if (body.name) {
             fields.push(`name='${body.name}'`);
@@ -85,7 +85,7 @@ class ToppingsRepository {
 
         let sql = `UPDATE topping ${fieldsStr} WHERE id = ${id}`;
 
-        return new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
             this.db.run(sql, err => {
                 if (err) {
                     reject(err);
@@ -100,8 +100,8 @@ class ToppingsRepository {
         })
     }
 
-    delete(id) {
-        return new Promise((resolve, reject) => {
+    async delete(id) {
+        return await new Promise((resolve, reject) => {
             this.getById(id).then(row => {
                 this.db.run(`delete from 'topping' where id=${id}`, err => {
                     if (err) reject(err);
